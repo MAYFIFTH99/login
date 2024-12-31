@@ -11,14 +11,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
+@Slf4j
 @RequiredArgsConstructor
 public class LoginController {
 
@@ -78,7 +81,7 @@ public class LoginController {
         return "redirect:/";
     }
 
-    @PostMapping("/login")
+    //@PostMapping("/login")
     public String loginV3(@Validated @ModelAttribute LoginForm loginForm, BindingResult bindingResult, HttpServletRequest request) {
         if(bindingResult.hasErrors()) {
             return "login/loginForm";
@@ -94,6 +97,22 @@ public class LoginController {
         HttpSession session = request.getSession(true);
         session.setAttribute("loginMember", loginMember);
         return "redirect:/";
+    }
+
+    @PostMapping("/login")
+    public String loginV4(@Validated @ModelAttribute LoginForm loginForm, BindingResult bindingResult,
+                          @RequestParam(defaultValue = "/") String redirectURL, HttpServletRequest request) {
+        if (bindingResult.hasErrors()) {
+            return "login/loginForm";
+        }
+        Member loginMember = loginService.login(loginForm.getLoginId(), loginForm.getPassword());
+        if (loginMember == null) {
+            bindingResult.reject("loginFail", "아이디 또는 비밀번호가 없습니다.");
+            return "login/loginForm";
+        }
+        HttpSession session = request.getSession(true);
+        session.setAttribute("loginMember", loginMember);
+        return "redirect:" + redirectURL;
     }
 
     //@PostMapping("/logout")
