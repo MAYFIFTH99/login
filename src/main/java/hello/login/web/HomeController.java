@@ -1,5 +1,6 @@
 package hello.login.web;
 
+import hello.login.web.argumentresolver.Login;
 import hello.login.web.member.Member;
 import hello.login.web.member.MemberRepository;
 import hello.login.web.session.SessionManager;
@@ -69,8 +70,17 @@ public class HomeController {
         return "/login/loginHome";
     }
 
-    @GetMapping("/")
+    //@GetMapping("/")
     public String homeLoginV3SpringAnnotation(@SessionAttribute(name = "loginMember", required = false) Member loginMember, Model model) {
+        if (loginMember == null) {
+            return "home";
+        }
+        model.addAttribute("member", loginMember);
+        return "/login/loginHome";
+    }
+
+    @GetMapping("/")
+    public String homeLoginV3ArgumentResolver(@Login Member loginMember, Model model) {
         if (loginMember == null) {
             return "home";
         }
